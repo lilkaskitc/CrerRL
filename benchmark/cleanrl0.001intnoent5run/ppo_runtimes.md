@@ -1,0 +1,3 @@
+|            |   lilkaskitc-ludwig-maximilian-university-of-munich/cleanrltest/ppo ({'tag': ['kr-505']}) |   lilkaskitc-ludwig-maximilian-university-of-munich/cleanrltest/credal_ppo2 ({'tag': ['pr-913']}) |
+|:-----------|------------------------------------------------------------------------------------------:|--------------------------------------------------------------------------------------------------:|
+| Acrobot-v1 |                                                                                   10.0877 |                                                                                           88.4061 |

@@ -1,0 +1,4 @@
+|             |   lilkaskitc-ludwig-maximilian-university-of-munich/cleanrltest/ppo ({'tag': ['pr-505']}) |   lilkaskitc-ludwig-maximilian-university-of-munich/cleanrltest/credal_ppo ({'tag': ['pr-507']}) |
+|:------------|------------------------------------------------------------------------------------------:|-------------------------------------------------------------------------------------------------:|
+| CartPole-v1 |                                                                                   3.43434 |                                                                                          163.526 |
+| Acrobot-v1  |                                                                                   7.84675 |                                                                                          202.702 |

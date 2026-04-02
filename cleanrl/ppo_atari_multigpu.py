@@ -24,7 +24,7 @@ from cleanrl_utils.atari_wrappers import (  # isort:skip
     MaxAndSkipEnv,
     NoopResetEnv,
 )
-
+import copy
 
 @dataclass
 class Args:
@@ -48,13 +48,13 @@ class Args:
     # Algorithm specific arguments
     env_id: str = "BreakoutNoFrameskip-v4"
     """the id of the environment"""
-    total_timesteps: int = 10000000
+    total_timesteps: int = 2000000
     """total timesteps of the experiments"""
     learning_rate: float = 2.5e-4
     """the learning rate of the optimizer"""
-    local_num_envs: int = 8
+    local_num_envs: int = 10
     """the number of parallel game environments (in the local rank)"""
-    num_steps: int = 128
+    num_steps: int = 500
     """the number of steps to run in each environment per policy rollout"""
     anneal_lr: bool = True
     """Toggle learning rate annealing for policy and value networks"""
@@ -378,6 +378,46 @@ E.g., `torchrun --standalone --nnodes=1 --nproc_per_node=2 ppo_atari_multigpu.py
 
             if args.target_kl is not None and approx_kl > args.target_kl:
                 break
+
+        # Evaluate using greedy actors
+        eval_rewards = []
+
+        # Deepcopy the agent so the evaluation doesn't interfere with training
+        eval_agent = copy.deepcopy(agent)
+        eval_agent.eval()
+
+        for _ in range(10):  # Run 10 greedy evaluations
+            eval_env = gym.make(args.env_id)
+            eval_env = NoopResetEnv(eval_env, noop_max=30)
+            eval_env = MaxAndSkipEnv(eval_env, skip=4)
+            eval_env = EpisodicLifeEnv(eval_env)
+            if "FIRE" in eval_env.unwrapped.get_action_meanings():
+                eval_env = FireResetEnv(eval_env)
+            eval_env = ClipRewardEnv(eval_env)
+            eval_env = gym.wrappers.ResizeObservation(eval_env, (84, 84))
+            eval_env = gym.wrappers.GrayScaleObservation(eval_env)
+            eval_env = gym.wrappers.FrameStack(eval_env, 4)
+
+            eval_obs, _ = eval_env.reset()
+            eval_obs = torch.tensor(eval_obs, dtype=torch.float32).to(device).unsqueeze(0)  # Add batch dim
+            eval_done = False
+            eval_total_reward = 0
+
+            while not eval_done:
+                with torch.no_grad():
+                    eval_action, _, _, _ = eval_agent.get_action_and_value(eval_obs)
+
+                eval_next_obs, eval_reward, eval_terminated, eval_truncated, _ = eval_env.step(eval_action.item())
+                eval_obs = torch.tensor(eval_next_obs, dtype=torch.float32).to(device).unsqueeze(0)
+                eval_total_reward += eval_reward
+                eval_done = eval_terminated or eval_truncated
+
+            eval_rewards.append(eval_total_reward)
+            eval_env.close()
+
+        eval_mean_reward = np.average(eval_rewards)
+        writer.add_scalar("evaluation/mean_reward_vs_steps", eval_mean_reward, global_step)
+        writer.add_scalar("evaluation/mean_reward_vs_time", eval_mean_reward, time.time() - start_time)
 
         y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
         var_y = np.var(y_true)

@@ -1,0 +1,3 @@
+|         |   lilkaskitc-ludwig-maximilian-university-of-munich/cleanrlatari/ppo_atari_envpool ({'tag': ['pr-605']}) |   lilkaskitc-ludwig-maximilian-university-of-munich/cleanrlatari/credal_ppo_atari_envpool ({'tag': ['pr-607']}) |
+|:--------|---------------------------------------------------------------------------------------------------------:|----------------------------------------------------------------------------------------------------------------:|
+| Pong-v5 |                                                                                                  371.542 |                                                                                                         1954.06 |

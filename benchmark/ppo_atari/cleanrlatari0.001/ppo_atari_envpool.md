@@ -1,0 +1,3 @@
+|         | lilkaskitc-ludwig-maximilian-university-of-munich/cleanrlatari/ppo_atari_envpool ({'tag': ['pr-605']})   | lilkaskitc-ludwig-maximilian-university-of-munich/cleanrlatari/credal_ppo_atari_envpool ({'tag': ['pr-611']})   |
+|:--------|:---------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------|
+| Pong-v5 | -13.55 ± 0.62                                                                                            | -12.56 ± 4.17                                                                                                   |

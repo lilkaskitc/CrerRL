@@ -12,6 +12,7 @@ import torch.optim as optim
 import tyro
 from torch.distributions.normal import Normal
 from torch.utils.tensorboard import SummaryWriter
+import copy
 
 
 @dataclass
@@ -42,7 +43,7 @@ class Args:
     # Algorithm specific arguments
     env_id: str = "HalfCheetah-v4"
     """the id of the environment"""
-    total_timesteps: int = 1000000
+    total_timesteps: int = 400000
     """total timesteps of the experiments"""
     learning_rate: float = 3e-4
     """the learning rate of the optimizer"""
@@ -306,6 +307,38 @@ if __name__ == "__main__":
 
             if args.target_kl is not None and approx_kl > args.target_kl:
                 break
+       
+        eval_env = gym.make(args.env_id)
+
+        # Evaluate using greedy actors
+        eval_rewards = []
+
+        # Deepcopy the agent so the evaluation doesn't interfere with training
+        eval_agent = copy.deepcopy(agent)
+        eval_agent.eval()
+
+        for _ in range(10):  # Run 10 greedy evaluations
+            eval_obs, _ = eval_env.reset()
+            eval_obs = torch.tensor(eval_obs, dtype=torch.float32).to(device).unsqueeze(0)  # Add batch dim
+            eval_done = False
+            eval_total_reward = 0
+
+            while not eval_done:
+                with torch.no_grad():
+                    eval_action, _, _, _ = eval_agent.get_action_and_value(eval_obs)
+
+                eval_next_obs, eval_reward, eval_terminated, eval_truncated, _ = eval_env.step(eval_action.cpu().numpy()[0])
+                eval_obs = torch.tensor(eval_next_obs, dtype=torch.float32).to(device).unsqueeze(0)
+                eval_total_reward += eval_reward
+                eval_done = eval_terminated or eval_truncated
+
+            eval_rewards.append(eval_total_reward)
+        eval_mean_reward = np.average(eval_rewards)
+        writer.add_scalar("evaluation/mean_reward_vs_steps", eval_mean_reward, global_step)
+        writer.add_scalar("evaluation/mean_reward_vs_time", eval_mean_reward, time.time() - start_time)
+
+        # Optional: Close the eval environment after use
+        eval_env.close()
 
         y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
         var_y = np.var(y_true)

@@ -25,12 +25,12 @@ python -m openrlbenchmark.rlops_multi_metrics \
     --filters '?we=lilkaskitc-ludwig-maximilian-university-of-munich&wpn=cleanrltest&ceik=env_id&cen=exp_name&metrics=evaluation/mean_reward_vs_steps&metrics=losses/entropy&metrics=charts/episodic_return' \
         'ppo?tag=kr-505' \
         'ppo?tag=pr-505' \
-        'credal_ppo2?tag=pr-913' \
+        'credal_ppo2?tag=pr-919' \
     --env-ids Acrobot-v1 \
     --no-check-empty-runs \
     --pc.ncols 3 \
     --pc.ncols-legend 2 \
-    --output-filename benchmark/cleanrl0.001int5run/ppo \
+    --output-filename benchmark/cleanrl1e-5int/ppo \
     --scan-history
 
 python -m cleanrl_utils.benchmark \
@@ -64,7 +64,7 @@ python -m cleanrl_utils.benchmark \
 
 python -m cleanrl_utils.benchmark \
     --env-ids Pong-v5 \
-    --command "python cleanrl/credal_ppo_atari_envpool.py --track --wandb-project-name cleanrlatari" \
+    --command "python cleanrl/credal_ppo_atari_envpool2.py --track --wandb-project-name cleanrlatari" \
     --num-seeds 3 \
     --workers 9 
 
@@ -83,12 +83,12 @@ python -m openrlbenchmark.rlops_multi_metrics \
     --filters '?we=lilkaskitc-ludwig-maximilian-university-of-munich&wpn=cleanrlatari&ceik=env_id&cen=exp_name&metrics=evaluation/mean_reward_vs_steps&metrics=losses/entropy&metrics=charts/episodic_return' \
         'ppo_atari_envpool?tag=pr-605' \
         'ppo_atari_envpool?tag=kr-505' \
-        'credal_ppo_atari_envpool2?tag=kr-515' \
+        'credal_ppo_atari_envpool2?tag=kr-523' \
     --env-ids Pong-v5 \
     --no-check-empty-runs \
     --pc.ncols 3 \
     --pc.ncols-legend 2 \
-    --output-filename benchmark/cleanrlatari0.001noent/ppo_atari_envpool \
+    --output-filename benchmark/cleanrlatari1e-7noent/ppo_atari_envpool \
     --scan-history
 
 
@@ -187,5 +187,5 @@ python -m openrlbenchmark.rlops_multi_metrics \
     --no-check-empty-runs \
     --pc.ncols 3 \
     --pc.ncols-legend 2 \
-    --output-filename benchmark/cleanrlatari1e5tranrobnoent/ppo_atari_envpool \
+    --output-filename benchmark/cleanrlatari1e5tranrobnoent5run/ppo_atari_envpool \
     --scan-history

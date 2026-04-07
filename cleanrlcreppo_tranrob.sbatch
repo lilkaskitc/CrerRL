@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=cleanrl_creppoAtari_trannoent1e7
+#SBATCH --job-name=cleanrl_creppoAtari_trannoent1000_45
 #rrSBATCH -p   mcml-dgx-a100-40x8,mcml-hgx-a100-80x4,mcml-hgx-h100-94x4 
 #SBATCH -p  lrz-dgx-1-p100x8,lrz-dgx-1-v100x8,lrz-dgx-a100-80x8,lrz-hgx-a100-80x4,lrz-hgx-h100-94x4 
 #rrSBATCH --qos=mcml
@@ -25,8 +25,9 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python -m cleanrl_utils.benchmark \
     --env-ids Pong-v5 \
-    --command "python cleanrl/credal_ppo_atari_envpool2_tranrob.py --credal-lambda 1.0e7 --track --wandb-project-name cleanrlataritran" \
-    --num-seeds 3 \
+    --command "python cleanrl/credal_ppo_atari_envpool2_tranrob.py --credal-lambda 1000 --track --wandb-project-name cleanrlataritran" \
+    --start-seed 4 \
+    --num-seeds 2 \
     --workers 9   &>> ${JOBLOG}
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') Job ${SLURM_JOB_ID} stopped ..." &>> ${JOBLOG}

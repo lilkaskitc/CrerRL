@@ -1,0 +1,160 @@
+diff --git a/cleanrlcreppo.sbatch b/cleanrlcreppo.sbatch
+index efc0f25..b8b0ec0 100644
+--- a/cleanrlcreppo.sbatch
++++ b/cleanrlcreppo.sbatch
+@@ -1,5 +1,5 @@
+ #!/bin/bash
+-#SBATCH --job-name=cleanrl_creppoatari_noent1e-5
++#SBATCH --job-name=cleanrl_creppoatari_noent0.001_45
+ #rrSBATCH -p   mcml-dgx-a100-40x8,mcml-hgx-a100-80x4,mcml-hgx-h100-94x4
+ #SBATCH -p  lrz-dgx-1-p100x8,lrz-dgx-1-v100x8,lrz-dgx-a100-80x8,lrz-hgx-a100-80x4,lrz-hgx-h100-94x4
+ #rrSBATCH --qos=mcml
+@@ -23,10 +23,12 @@ cd "$PROJECT_PATH"
+ 
+ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+ 
++
+ python -m cleanrl_utils.benchmark \
+     --env-ids Pong-v5 \
+-    --command "python cleanrl/credal_ppo_atari_envpool2.py --credal-lambda 1.0e-5 --ent-coef 0.0 --track --wandb-project-name cleanrlatari" \
+-    --num-seeds 3 \
+-    --workers 9  &>> ${JOBLOG}
++    --command "python cleanrl/credal_ppo_atari_envpool2.py --credal-lambda 0.001 --ent-coef 0.0 --track --wandb-project-name cleanrlatari" \
++    --start-seed 4 \
++    --num-seeds 2 \
++    --workers 9   &>> ${JOBLOG}
+ 
+ echo "$(date '+%Y-%m-%d %H:%M:%S') Job ${SLURM_JOB_ID} stopped ..." &>> ${JOBLOG}
+\ No newline at end of file
+diff --git a/cleanrlcreppo_tranrob.sbatch b/cleanrlcreppo_tranrob.sbatch
+index 17890c5..e57eb44 100644
+--- a/cleanrlcreppo_tranrob.sbatch
++++ b/cleanrlcreppo_tranrob.sbatch
+@@ -1,5 +1,5 @@
+ #!/bin/bash
+-#SBATCH --job-name=cleanrl_creppoAtari_trannoent1e7
++#SBATCH --job-name=cleanrl_creppoAtari_trannoent1000_45
+ #rrSBATCH -p   mcml-dgx-a100-40x8,mcml-hgx-a100-80x4,mcml-hgx-h100-94x4 
+ #SBATCH -p  lrz-dgx-1-p100x8,lrz-dgx-1-v100x8,lrz-dgx-a100-80x8,lrz-hgx-a100-80x4,lrz-hgx-h100-94x4 
+ #rrSBATCH --qos=mcml
+@@ -25,8 +25,9 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+ 
+ python -m cleanrl_utils.benchmark \
+     --env-ids Pong-v5 \
+-    --command "python cleanrl/credal_ppo_atari_envpool2_tranrob.py --credal-lambda 1.0e7 --track --wandb-project-name cleanrlataritran" \
+-    --num-seeds 3 \
++    --command "python cleanrl/credal_ppo_atari_envpool2_tranrob.py --credal-lambda 1000 --track --wandb-project-name cleanrlataritran" \
++    --start-seed 4 \
++    --num-seeds 2 \
+     --workers 9   &>> ${JOBLOG}
+ 
+ echo "$(date '+%Y-%m-%d %H:%M:%S') Job ${SLURM_JOB_ID} stopped ..." &>> ${JOBLOG}
+\ No newline at end of file
+diff --git a/cleanrlppo.sbatch b/cleanrlppo.sbatch
+index d8cb505..a5d3122 100644
+--- a/cleanrlppo.sbatch
++++ b/cleanrlppo.sbatch
+@@ -1,12 +1,12 @@
+ #!/bin/bash
+-#SBATCH --job-name=cleanrl_ppoatari_rewrob45
++#SBATCH --job-name=cleanrl_ppoatari_trannoent45
+ #rrSBATCH -p   mcml-dgx-a100-40x8,mcml-hgx-a100-80x4,mcml-hgx-h100-94x4 
+ #SBATCH -p  lrz-dgx-1-p100x8,lrz-dgx-1-v100x8,lrz-dgx-a100-80x8,lrz-hgx-a100-80x4,lrz-hgx-h100-94x4 
+ #rrSBATCH --qos=mcml
+ #SBATCH --gres=gpu:2
+ #SBATCH --cpus-per-task=12
+ #rrSBATCH --mem=64G
+-#SBATCH -t 12:00:00
++#SBATCH -t 06:00:00
+ #SBATCH --output=logs/%x_%j.out
+ #SBATCH --error=logs/%x_%j.err
+ #SBATCH --requeue
+@@ -26,7 +26,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+ 
+ python -m cleanrl_utils.benchmark \
+     --env-ids Pong-v5 \
+-    --command "python cleanrl/ppo_atari_envpool_rewrob.py --ent-coef 0.01 --track --wandb-project-name cleanrlatarirew" \
++    --command "python cleanrl/ppo_atari_envpool_tranrob.py --ent-coef 0.0 --track --wandb-project-name cleanrlataritran" \
+     --start-seed 4 \
+     --num-seeds 2 \
+     --workers 9  &>> ${JOBLOG}
+diff --git a/cmd.md b/cmd.md
+index 2c4d9eb..54b2d95 100644
+--- a/cmd.md
++++ b/cmd.md
+@@ -25,12 +25,12 @@ python -m openrlbenchmark.rlops_multi_metrics \
+     --filters '?we=lilkaskitc-ludwig-maximilian-university-of-munich&wpn=cleanrltest&ceik=env_id&cen=exp_name&metrics=evaluation/mean_reward_vs_steps&metrics=losses/entropy&metrics=charts/episodic_return' \
+         'ppo?tag=kr-505' \
+         'ppo?tag=pr-505' \
+-        'credal_ppo2?tag=pr-913' \
++        'credal_ppo2?tag=pr-919' \
+     --env-ids Acrobot-v1 \
+     --no-check-empty-runs \
+     --pc.ncols 3 \
+     --pc.ncols-legend 2 \
+-    --output-filename benchmark/cleanrl0.001int5run/ppo \
++    --output-filename benchmark/cleanrl1e-5int/ppo \
+     --scan-history
+ 
+ python -m cleanrl_utils.benchmark \
+@@ -64,7 +64,7 @@ python -m cleanrl_utils.benchmark \
+ 
+ python -m cleanrl_utils.benchmark \
+     --env-ids Pong-v5 \
+-    --command "python cleanrl/credal_ppo_atari_envpool.py --track --wandb-project-name cleanrlatari" \
++    --command "python cleanrl/credal_ppo_atari_envpool2.py --track --wandb-project-name cleanrlatari" \
+     --num-seeds 3 \
+     --workers 9 
+ 
+@@ -83,12 +83,12 @@ python -m openrlbenchmark.rlops_multi_metrics \
+     --filters '?we=lilkaskitc-ludwig-maximilian-university-of-munich&wpn=cleanrlatari&ceik=env_id&cen=exp_name&metrics=evaluation/mean_reward_vs_steps&metrics=losses/entropy&metrics=charts/episodic_return' \
+         'ppo_atari_envpool?tag=pr-605' \
+         'ppo_atari_envpool?tag=kr-505' \
+-        'credal_ppo_atari_envpool2?tag=kr-515' \
++        'credal_ppo_atari_envpool2?tag=kr-519' \
+     --env-ids Pong-v5 \
+     --no-check-empty-runs \
+     --pc.ncols 3 \
+     --pc.ncols-legend 2 \
+-    --output-filename benchmark/cleanrlatari0.001noent/ppo_atari_envpool \
++    --output-filename benchmark/cleanrlatari1e-5noent/ppo_atari_envpool \
+     --scan-history
+ 
+ 
+@@ -182,10 +182,10 @@ python -m openrlbenchmark.rlops_multi_metrics \
+     --filters '?we=lilkaskitc-ludwig-maximilian-university-of-munich&wpn=cleanrlataritran&ceik=env_id&cen=exp_name&metrics=evaluation/mean_reward_vs_steps&metrics=evaluation/wall_collision_rate&metrics=evaluation/wall_center_y' \
+         'ppo_atari_envpool_tranrob?tag=pr-505' \
+         'ppo_atari_envpool_tranrob?tag=kr-505' \
+-        'credal_ppo_atari_envpool2_tranrob?tag=kr-521' \
++        'credal_ppo_atari_envpool2_tranrob?tag=kr-515' \
+     --env-ids  Pong-v5 \
+     --no-check-empty-runs \
+     --pc.ncols 3 \
+     --pc.ncols-legend 2 \
+-    --output-filename benchmark/cleanrlatari1e5tranrobnoent/ppo_atari_envpool \
++    --output-filename benchmark/cleanrlatari1000tranrobnoent5run/ppo_atari_envpool \
+     --scan-history
+diff --git a/logs/cleanrl_creppoAtari_trannoent1e6_5535969.err b/logs/cleanrl_creppoAtari_trannoent1e6_5535969.err
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/logs/cleanrl_creppoAtari_trannoent1e6_5535969.out b/logs/cleanrl_creppoAtari_trannoent1e6_5535969.out
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/logs/cleanrl_creppoAtari_trannoent1e7_5535970.err b/logs/cleanrl_creppoAtari_trannoent1e7_5535970.err
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/logs/cleanrl_creppoAtari_trannoent1e7_5535970.out b/logs/cleanrl_creppoAtari_trannoent1e7_5535970.out
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/logs/cleanrl_creppoatari_noent0.1_45_5535346.err b/logs/cleanrl_creppoatari_noent0.1_45_5535346.err
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/logs/cleanrl_creppoatari_noent0.1_45_5535346.out b/logs/cleanrl_creppoatari_noent0.1_45_5535346.out
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/logs/cleanrl_creppoatari_noent1e-4_5536346.err b/logs/cleanrl_creppoatari_noent1e-4_5536346.err
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/logs/cleanrl_creppoatari_noent1e-4_5536346.out b/logs/cleanrl_creppoatari_noent1e-4_5536346.out
+deleted file mode 100644
+index e69de29..0000000

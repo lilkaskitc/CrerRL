@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=cleanrl_ppoatari_rewrob45
+#SBATCH --job-name=cleanrl_ppoatari_trannoent45
 #rrSBATCH -p   mcml-dgx-a100-40x8,mcml-hgx-a100-80x4,mcml-hgx-h100-94x4 
 #SBATCH -p  lrz-dgx-1-p100x8,lrz-dgx-1-v100x8,lrz-dgx-a100-80x8,lrz-hgx-a100-80x4,lrz-hgx-h100-94x4 
 #rrSBATCH --qos=mcml
 #SBATCH --gres=gpu:2
 #SBATCH --cpus-per-task=12
 #rrSBATCH --mem=64G
-#SBATCH -t 12:00:00
+#SBATCH -t 06:00:00
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --error=logs/%x_%j.err
 #SBATCH --requeue
@@ -26,7 +26,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python -m cleanrl_utils.benchmark \
     --env-ids Pong-v5 \
-    --command "python cleanrl/ppo_atari_envpool_rewrob.py --ent-coef 0.01 --track --wandb-project-name cleanrlatarirew" \
+    --command "python cleanrl/ppo_atari_envpool_tranrob.py --ent-coef 0.0 --track --wandb-project-name cleanrlataritran" \
     --start-seed 4 \
     --num-seeds 2 \
     --workers 9  &>> ${JOBLOG}
